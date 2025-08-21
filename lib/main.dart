@@ -32,11 +32,17 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+      body: Stack(
+        children: [
+          Image.asset(
+            'public/jyutyuelisten.png',
+            fit: BoxFit.cover,
+            height: double.infinity,
+            width: double.infinity,
+          ),
+          const TranscriptionScreen(),
+        ],
       ),
-      body: const TranscriptionScreen(),
     );
   }
 }

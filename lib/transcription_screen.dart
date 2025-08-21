@@ -209,92 +209,95 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: _getSenseStateColor(),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Status: ${_getSenseStateText()}  VAD: ${_vadActive ? 'active' : 'idle'}',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: !_isMp3Recording
-                            ? _startSenseRecordingMp3
-                            : null,
-                        child: const Text('Start MP3 Recording'),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed:
-                            _senseState == SensevoiceState.connected &&
-                                _isMp3Recording
-                            ? _stopSenseRecordingMp3
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text('Stop MP3 Recording'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        Expanded(
-          child: StreamingConcatenationViewer(
-            concatenationStream:
-                _sensevoiceService.concatenationService.resultStream,
-            selectedLanguageCode: 'zh_HK',
-          ),
-        ),
-        Card(
-          margin: const EdgeInsets.all(16),
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Center(
+    return Container(
+      margin: const EdgeInsets.only(top: 130),
+      child: Column(
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.mic_none, size: 48, color: Colors.grey[400]),
+                  Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: _getSenseStateColor(),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Status: ${_getSenseStateText()}  VAD: ${_vadActive ? 'active' : 'idle'}',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 16),
-                  Text(
-                    'Start recording to see concatenated words',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
-                    textAlign: TextAlign.center,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: !_isMp3Recording
+                              ? _startSenseRecordingMp3
+                              : null,
+                          child: const Text('Start MP3 Recording'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed:
+                              _senseState == SensevoiceState.connected &&
+                                  _isMp3Recording
+                              ? _stopSenseRecordingMp3
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Stop MP3 Recording'),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
           ),
-        ),
-        // SenseVoiceConversion(context),
-        // SenseVoiceLogViewer(context),
-      ],
+          Expanded(
+            child: StreamingConcatenationViewer(
+              concatenationStream:
+                  _sensevoiceService.concatenationService.resultStream,
+              selectedLanguageCode: 'zh_HK',
+            ),
+          ),
+          Card(
+            margin: const EdgeInsets.all(16),
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.mic_none, size: 48, color: Colors.grey[400]),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Start recording to see concatenated words',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // SenseVoiceConversion(context),
+          // SenseVoiceLogViewer(context),
+        ],
+      ),
     );
   }
 
