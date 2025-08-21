@@ -1,3 +1,4 @@
+import 'package:canto_transcripts_frontend/utilities/service_locator.dart';
 import 'package:canto_transcripts_frontend/utilities/utilities.dart';
 import 'package:canto_transcripts_frontend/widgets/transliteration_row.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,6 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
   final TextEditingController _senseUrlController = TextEditingController(
     text: 'ws://localhost:8000/api/realtime/ws',
   );
-  final List<String> _messageLog = [];
   final List<String> _senseLog = [];
   final List<dynamic> _senseConversionLog = [];
   final List<dynamic> _concatenationLog = [];
@@ -46,13 +46,6 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
     _initializeServiceListeners();
 
     _micService = MicRecorderService();
-  }
-
-  void _clearSenseLog() {
-    setState(() {
-      _senseLog.clear();
-      _concatenationLog.clear();
-    });
   }
 
   void _initializeServiceListeners() {
@@ -121,6 +114,8 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
             'usedCharacters': usedCharacters,
             'timestamp': event.timestamp,
           });
+
+          // Translation now handled asynchronously inside StreamConcatenationService
 
           _senseLog.add(
             '${event.timestamp.toString().substring(11, 19)} - concatenated ${isFinal ? 'final' : 'building'}: "$currentWord" (new: "$newCharacters")',

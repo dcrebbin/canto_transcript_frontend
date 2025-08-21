@@ -26,56 +26,92 @@ class ConcatenatedPhraseDisplay extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      child: Container(
-        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
-        child: GlowingBorder(
-          padding: const EdgeInsets.all(8),
-          color: color,
-          strokeWidth: 2,
-          glowSigma: 12,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
+            child: GlowingBorder(
+              padding: const EdgeInsets.all(8),
+              color: color,
+              strokeWidth: 2,
+              glowSigma: 12,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Cantonese", style: TextStyle(color: Colors.white)),
-                  if (result.newCharacters.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                  Text("English", style: TextStyle(color: Colors.white)),
+                  if (result.translation.isEmpty)
+                    Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'New: ${result.newCharacters}',
-                        style: TextStyle(
-                          color: Colors.blue[700],
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                    ),
+                  if (result.translation.isNotEmpty)
+                    Text(
+                      result.translation,
+                      style: const TextStyle(color: Colors.white),
                     ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Center(
-                child: TransliterationRow(
-                  chinese: result.currentWord.split(''),
-                  romanization: Utilities.retrieveRomanization(
-                    result.currentWord,
-                    selectedLanguageCode,
-                  ).split(' '),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+
+          Container(
+            margin: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
+            child: GlowingBorder(
+              padding: const EdgeInsets.all(8),
+              color: color,
+              strokeWidth: 2,
+              glowSigma: 12,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Cantonese", style: TextStyle(color: Colors.white)),
+                      if (result.newCharacters.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[100],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'New: ${result.newCharacters}',
+                            style: TextStyle(
+                              color: Colors.blue[700],
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: TransliterationRow(
+                      chinese: result.currentWord.split(''),
+                      romanization: Utilities.retrieveRomanizationTokensAligned(
+                        result.currentWord,
+                        selectedLanguageCode,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -101,6 +137,7 @@ class _StreamingConcatenationViewerState
   ConcatenationResult? currentResult;
   final List<_HistoryItem> history = [];
   final ScrollController _scrollController = ScrollController();
+  bool autoscroll = true;
 
   @override
   void initState() {
@@ -109,13 +146,26 @@ class _StreamingConcatenationViewerState
       setState(() {
         currentResult = result;
         if (result.isFinal) {
-          history.add(_HistoryItem(result: result, color: determineColor()));
+          final int existingIndex = history.lastIndexWhere(
+            (h) => h.result.currentWord == result.currentWord,
+          );
+
+          print('existingIndex: $existingIndex');
+          if (existingIndex != -1) {
+            final Color existingColor = history[existingIndex].color;
+            history[existingIndex] = _HistoryItem(
+              result: result,
+              color: existingColor,
+            );
+          } else {
+            history.add(_HistoryItem(result: result, color: determineColor()));
+          }
         }
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _scrollController.hasClients) {
+        if (mounted && _scrollController.hasClients && autoscroll) {
           _scrollController.animateTo(
-            _scrollController.position.minScrollExtent,
+            _scrollController.position.maxScrollExtent,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           );
@@ -146,17 +196,34 @@ class _StreamingConcatenationViewerState
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        TextButton(
-          style: TextButton.styleFrom(
-            backgroundColor: Colors.grey[200],
-            foregroundColor: Colors.grey[800],
-          ),
-          onPressed: () {
-            setState(() {
-              history.clear();
-            });
-          },
-          child: const Text('Clear'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.grey[200],
+                foregroundColor: Colors.grey[800],
+              ),
+              onPressed: () {
+                setState(() {
+                  history.clear();
+                });
+              },
+              child: const Text('Clear'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.grey[200],
+                foregroundColor: Colors.grey[800],
+              ),
+              onPressed: () {
+                setState(() {
+                  autoscroll = !autoscroll;
+                });
+              },
+              child: Text(autoscroll ? 'Stop Autoscroll' : 'Autoscroll'),
+            ),
+          ],
         ),
         Expanded(
           child: ListView.builder(
@@ -165,10 +232,22 @@ class _StreamingConcatenationViewerState
             itemCount: history.length,
             reverse: false,
             itemBuilder: (context, index) {
-              return ConcatenatedPhraseDisplay(
-                result: history[index].result,
-                selectedLanguageCode: widget.selectedLanguageCode,
-                color: history[history.length - index - 1].color,
+              return Column(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(
+                      bottom: 10,
+                      left: 16,
+                      right: 16,
+                    ),
+                    child: Divider(color: Colors.white, thickness: 2),
+                  ),
+                  ConcatenatedPhraseDisplay(
+                    result: history[index].result,
+                    selectedLanguageCode: widget.selectedLanguageCode,
+                    color: history[history.length - index - 1].color,
+                  ),
+                ],
               );
             },
           ),

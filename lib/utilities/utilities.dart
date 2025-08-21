@@ -257,4 +257,34 @@ class Utilities {
     }
     return "?";
   }
+
+  /// Returns a list of romanization tokens aligned 1:1 with the input phrase's
+  /// characters. For Chinese characters, this yields the jyutping for that
+  /// character. For non-Chinese characters, the character itself is returned.
+  static List<String> retrieveRomanizationTokensAligned(
+    String phrase,
+    String languageCode, {
+    bool returnMultiple = false,
+  }) {
+    switch (languageCode) {
+      case "zh_HK":
+        final List<String> tokens = [];
+        for (int i = 0; i < phrase.length; i++) {
+          final String ch = phrase[i];
+          if (isChinese(ch)) {
+            final List<String> jyut = JyutpingHelper.getWholeJyutpingPhrase(
+              ch,
+              returnMultiple,
+            );
+            tokens.add(jyut.isNotEmpty ? jyut.first : "");
+          } else {
+            // For non-Chinese, keep alignment with an empty romanization token.
+            tokens.add("");
+          }
+        }
+        return tokens;
+      default:
+        return List<String>.generate(phrase.length, (index) => "?");
+    }
+  }
 }

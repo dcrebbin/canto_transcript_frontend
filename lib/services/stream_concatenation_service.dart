@@ -1,16 +1,19 @@
 import 'dart:async';
+import 'package:canto_transcripts_frontend/utilities/service_locator.dart';
 
 class ConcatenationResult {
   final String currentWord;
   final String newCharacters;
   final bool isFinal;
   final List<String> usedCharacters;
+  final String translation;
 
   const ConcatenationResult({
     required this.currentWord,
     required this.newCharacters,
     required this.isFinal,
     required this.usedCharacters,
+    required this.translation,
   });
 }
 
@@ -53,12 +56,26 @@ class StreamConcatenationService {
       _currentWord = updatedWord;
       _isBuilding = false;
 
-      _resultController.add(ConcatenationResult(
-        currentWord: _currentWord,
-        newCharacters: newCharacters,
-        isFinal: true,
-        usedCharacters: _usedCharacters.toList(),
-      ));
+      // Capture values before reset for later translation update
+      final String wordForTranslation = _currentWord;
+      final List<String> usedCharsForTranslation = _usedCharacters.toList();
+
+      _resultController.add(
+        ConcatenationResult(
+          currentWord: _currentWord,
+          newCharacters: newCharacters,
+          isFinal: true,
+          usedCharacters: usedCharsForTranslation,
+          translation: '',
+        ),
+      );
+
+      // Kick off translation asynchronously and emit an update when ready
+      // We intentionally do not await this to keep the stream responsive
+      _emitTranslationUpdate(
+        word: wordForTranslation,
+        usedCharacters: usedCharsForTranslation,
+      );
 
       reset();
     } else {
@@ -75,12 +92,37 @@ class StreamConcatenationService {
 
       _currentWord = updatedWord;
 
-      _resultController.add(ConcatenationResult(
-        currentWord: _currentWord,
-        newCharacters: newCharacters,
-        isFinal: false,
-        usedCharacters: _usedCharacters.toList(),
-      ));
+      _resultController.add(
+        ConcatenationResult(
+          currentWord: _currentWord,
+          newCharacters: newCharacters,
+          isFinal: false,
+          usedCharacters: _usedCharacters.toList(),
+          translation: '',
+        ),
+      );
+    }
+  }
+
+  Future<void> _emitTranslationUpdate({
+    required String word,
+    required List<String> usedCharacters,
+  }) async {
+    try {
+      if (word.isEmpty) return;
+      final String translation = await sl.ai.getTranslation(word);
+      if (_resultController.isClosed) return;
+      _resultController.add(
+        ConcatenationResult(
+          currentWord: word,
+          newCharacters: '',
+          isFinal: true,
+          usedCharacters: usedCharacters,
+          translation: translation,
+        ),
+      );
+    } catch (_) {
+      // Swallow translation errors to avoid breaking stream; UI can keep spinner
     }
   }
 
@@ -92,12 +134,15 @@ class StreamConcatenationService {
 
   void forceComplete() {
     if (_isBuilding && _currentWord.isNotEmpty) {
-      _resultController.add(ConcatenationResult(
-        currentWord: _currentWord,
-        newCharacters: '',
-        isFinal: true,
-        usedCharacters: _usedCharacters.toList(),
-      ));
+      _resultController.add(
+        ConcatenationResult(
+          currentWord: _currentWord,
+          newCharacters: '',
+          isFinal: true,
+          usedCharacters: _usedCharacters.toList(),
+          translation: '',
+        ),
+      );
     }
     reset();
   }

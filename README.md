@@ -1,5 +1,17 @@
 # canto_transcripts_frontend
 
+## Environment variables
+
+Create a `.env` file in the project root (not committed to git). Example:
+
+```
+OPEN_AI_API_KEY=sk-...
+SERVER_API_KEY=your-server-key
+PROXY_URL=https://your-proxy/
+```
+
+The app loads `.env` at startup using `flutter_dotenv`.
+
 A new Flutter project.
 
 ## Getting Started

@@ -1,3 +1,4 @@
+import 'package:canto_transcripts_frontend/services/ai_service.dart';
 import 'package:canto_transcripts_frontend/services/logging_service.dart';
 import 'package:canto_transcripts_frontend/services/notification_service.dart';
 import 'package:get_it/get_it.dart';
@@ -22,6 +23,7 @@ class ServiceLocator {
     getIt.registerLazySingleton<NotificationService>(
       () => NotificationService(),
     );
+    getIt.registerLazySingleton<AIService>(() => AIService());
   }
 
   Future<void> setupDependencies() async {
@@ -33,4 +35,5 @@ class ServiceLocator {
 extension ServiceLocatorExtensions on ServiceLocator {
   LoggingService get logging => get<LoggingService>();
   NotificationService get notification => get<NotificationService>();
+  AIService get ai => get<AIService>();
 }

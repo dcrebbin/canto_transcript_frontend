@@ -5,6 +5,8 @@
 *.swp
 .DS_Store
 .atom/
+.env
+.env.*
 .build/
 .buildlog/
 .history
