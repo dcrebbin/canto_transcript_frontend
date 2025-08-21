@@ -2,18 +2,18 @@ import 'package:canto_transcripts_frontend/utilities/utilities.dart';
 import 'package:canto_transcripts_frontend/widgets/transliteration_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../services/mic_recorder_service.dart';
-import '../../../services/sensevoice_service.dart';
-import '../widgets/concatenated_phrase_display.dart';
+import '../../services/mic_recorder_service.dart';
+import '../../services/sensevoice_service.dart';
+import 'widgets/concatenated_phrase_display.dart';
 
-class WebSocketTestScreen extends StatefulWidget {
-  const WebSocketTestScreen({super.key});
+class TranscriptionScreen extends StatefulWidget {
+  const TranscriptionScreen({super.key});
 
   @override
-  State<WebSocketTestScreen> createState() => _WebSocketTestScreenState();
+  State<TranscriptionScreen> createState() => _TranscriptionScreenState();
 }
 
-class _WebSocketTestScreenState extends State<WebSocketTestScreen>
+class _TranscriptionScreenState extends State<TranscriptionScreen>
     with TickerProviderStateMixin {
   late final ScrollController _scrollController = ScrollController();
   late SensevoiceService _sensevoiceService;
