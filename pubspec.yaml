@@ -1,0 +1,56 @@
+name: canto_transcripts_frontend
+description: "A new Flutter project."
+
+publish_to: "none" 
+version: 1.0.0+1
+environment:
+  sdk: ^3.10.0-98.0.dev
+
+dependencies:
+  flutter:
+    sdk: flutter
+  bloc: ^9.0.0
+  record: ^6.0.0
+  get_it: ^7.7.0
+  injectable: ^2.4.2
+  logging: ^1.2.0
+  jyutping:
+    git:
+      url: https://github.com/dcrebbin/jyutping-for-flutter.git
+      ref: main
+  
+  cupertino_icons: ^1.0.8
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
