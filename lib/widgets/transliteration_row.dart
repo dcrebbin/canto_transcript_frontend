@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:canto_transcripts_frontend/utilities/utilities.dart';
+import 'package:pinyin/pinyin.dart';
 
 class TransliterationRow extends StatelessWidget {
   const TransliterationRow({
@@ -16,6 +17,8 @@ class TransliterationRow extends StatelessWidget {
 
     for (int i = 0; i < chinese.length;) {
       final String ch = chinese[i];
+      final String traditionalChar =
+          ChineseHelper.convertCharToTraditionalChinese(ch);
       final bool isChineseChar = Utilities.isChinese(ch);
 
       if (isChineseChar) {
@@ -30,7 +33,7 @@ class TransliterationRow extends StatelessWidget {
                   style: const TextStyle(fontSize: 12, color: Colors.white),
                 ),
                 Text(
-                  ch,
+                  traditionalChar,
                   style: const TextStyle(fontSize: 26, color: Colors.white),
                 ),
               ],
