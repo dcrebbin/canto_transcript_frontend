@@ -213,61 +213,6 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
       margin: const EdgeInsets.only(top: 130),
       child: Column(
         children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: _getSenseStateColor(),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Status: ${_getSenseStateText()}  VAD: ${_vadActive ? 'active' : 'idle'}',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: !_isMp3Recording
-                              ? _startSenseRecordingMp3
-                              : null,
-                          child: const Text('Start MP3 Recording'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed:
-                              _senseState == SensevoiceState.connected &&
-                                  _isMp3Recording
-                              ? _stopSenseRecordingMp3
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text('Stop MP3 Recording'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
           Expanded(
             child: StreamingConcatenationViewer(
               concatenationStream:
@@ -275,317 +220,39 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
               selectedLanguageCode: 'zh_HK',
             ),
           ),
-          Card(
-            margin: const EdgeInsets.all(16),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(70),
+                topRight: Radius.circular(70),
+              ),
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(40),
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.mic_none, size: 48, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Start recording to see concatenated words',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
-                      textAlign: TextAlign.center,
+                    IconButton(
+                      onPressed: () {
+                        if (_isMp3Recording) {
+                          _stopSenseRecordingMp3();
+                        } else {
+                          _startSenseRecordingMp3();
+                        }
+                      },
+                      icon: Icon(
+                        _isMp3Recording ? Icons.mic_none : Icons.mic,
+                        size: 48,
+                        color: _isMp3Recording ? Colors.red : Colors.grey[400],
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          // SenseVoiceConversion(context),
-          // SenseVoiceLogViewer(context),
         ],
-      ),
-    );
-  }
-
-  Widget SenseVoiceConversion(BuildContext context) {
-    return Expanded(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'SenseVoice Log',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _senseConversionLog.clear();
-                      });
-                    },
-                    child: const Text('Clear'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: _senseConversionLog.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'No events yet...',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        )
-                      : Scrollbar(
-                          controller: _scrollController,
-                          thumbVisibility: true,
-                          trackVisibility: true,
-                          child: ListView.builder(
-                            controller: _scrollController,
-                            itemCount: _senseConversionLog.length,
-                            itemBuilder: (context, index) {
-                              final text = _senseConversionLog[index]['text'];
-                              final type = _senseConversionLog[index]['type'];
-
-                              if (type == 'chinese') {
-                                final romanisation =
-                                    Utilities.retrieveRomanization(
-                                      _senseConversionLog[index]['text'],
-                                      'zh_HK',
-                                    ).split(" ");
-                                return Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 2,
-                                    ),
-                                    child: TransliterationRow(
-                                      chinese:
-                                          _senseConversionLog[index]['text']
-                                              .split(''),
-                                      romanization: romanisation,
-                                    ),
-                                  ),
-                                );
-                              }
-                              return Text(text);
-                            },
-                          ),
-                        ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Expanded SenseVoiceLogViewer(BuildContext context) {
-    return Expanded(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'SenseVoice Log',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  TextButton(
-                    onPressed: _clearSenseLog,
-                    child: const Text('Clear'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: _senseLog.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'No events yet...',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: _senseLog.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 2),
-                              child: Text(
-                                _senseLog[index],
-                                style: const TextStyle(
-                                  fontFamily: 'monospace',
-                                  fontSize: 12,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget ConcatenationLogViewer(BuildContext context) {
-    return Expanded(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Concatenation Log',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _concatenationLog.clear();
-                      });
-                    },
-                    child: const Text('Clear'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: _concatenationLog.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'No concatenation events yet...',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: _concatenationLog.length,
-                          itemBuilder: (context, index) {
-                            final entry = _concatenationLog[index];
-                            final timestamp = (entry['timestamp'] as DateTime)
-                                .toString()
-                                .substring(11, 19);
-                            final currentWord = entry['currentWord'] as String;
-                            final newCharacters =
-                                entry['newCharacters'] as String;
-                            final isFinal = entry['isFinal'] as bool;
-                            final usedChars =
-                                (entry['usedCharacters'] as List<dynamic>).join(
-                                  ' ',
-                                );
-
-                            return Card(
-                              margin: const EdgeInsets.symmetric(vertical: 2),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          timestamp,
-                                          style: const TextStyle(
-                                            fontFamily: 'monospace',
-                                            fontSize: 11,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: isFinal
-                                                ? Colors.green
-                                                : Colors.orange,
-                                            borderRadius: BorderRadius.circular(
-                                              4,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            isFinal ? 'FINAL' : 'BUILDING',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Current Word: "$currentWord"',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    if (newCharacters.isNotEmpty)
-                                      Text(
-                                        'New Characters: "$newCharacters"',
-                                        style: TextStyle(
-                                          color: Colors.green[700],
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    Text(
-                                      'Used Characters: $usedChars',
-                                      style: const TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
